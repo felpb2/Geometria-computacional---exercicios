@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+
 using namespace std;
 
 #define _ cin.tie(0);ios::sync_with_stdio(0);
@@ -7,59 +8,75 @@ using namespace std;
 #define f first
 #define s second
 
-bool veri(tuple<int,int,int> &p1, tuple<int,int,int> p2){
-	return  (get<0>(p1)* get<1>(p2)-(get<1>(p1)* get<0>(p2))) > 0 ? true : false;
+bool lado( vector<double> &reta, pair<double,double> &ponto){ // verificar lado da circunferencia
+	return ( ponto.s > (reta[0] * ponto.f + reta[2]) ? true : false);
+}
+
+bool veri( vector<double> &reta, pair<double,double> &ponto){ // verificar se atingi algum ponto
+	return ( ponto.s == (reta[0] * ponto.f + reta[2]) ? true : false);
+}
+
+double distRetaPonto( vector<double> &reta, pair<double,double> &ponto){
+	return abs(reta[0] * ponto.f + reta[1] * ponto.s + reta[2] )/sqrt(pow(reta[0],2) + pow(reta[1],2));
+}
+
+double coefi( pair<double,double> &p1, pair<double,double> &p2){
+	return (p2.s - p1.s)/(p2.f - p1.f);
+}
+
+vector<double> reta( pair<double,double> &p1, pair<double,double> &p2){
+	double m = coefi(p1,p2);
+	vector<double> seq (3, 0);
+	seq[0] = m;
+	seq[1] = 1;
+	seq[2] = p1.s - m * p1.f;
+	return seq;
 }
 
 int main() {
 	_	
-	
-	int pretos,brancos;
-	while(cin >> pretos >> brancos){
 
-		vector<pair<int,int>> pret,branc;
+	int t;
+	while(cin >> t, t != 0){
+		
+		vector<pair<double,double>> pontos;
 
-		for(int i=0; i < pretos; i++){
-			int x,y;
-			cin >> x >> y;	
-			pret.push_back(mp(x,y));
-		}
-	
-		for(int i=0; i < brancos; i++){
-			int x,y;
+		for(int i=0; i < t; i++){
+			double x, y;
 			cin >> x >> y;
-			branc.push_back(mp(x,y));
+			pontos.push_back(mp(x,y));
 		}
 
-		tuple<int,int,int> vet[3];
-		tuple<int,int,int> vet2[3];
 
-		int contador;
-		double energia = 0;
-		for(int i = 0; i < pret.size() - 2; i++){
-			for(int j = i + 1; j < pret.size() - 1; j++){
-				for(int c = j + 1; c < pret.size(); c++){
-					vet[0] = mt(pret[j].f-pret[i].f,pret[j].s-pret[i].s,0);
-					vet[1] = mt(pret[c].f-pret[j].f,pret[c].s-pret[j].s,0);
-					vet[2] = mt(pret[i].f-pret[c].f,pret[i].s-pret[c].s,0);
-					contador = 0;
-					for(int v=0;  v < branc.size(); v++){
-						vet2[0] = mt(branc[v].f-pret[i].f,branc[v].s-pret[i].s,0);
-						vet2[1] = mt(branc[v].f-pret[j].f,branc[v].s-pret[j].s,0);
-						vet2[2] = mt(branc[v].f-pret[c].f,branc[v].s-pret[c].s,0);
-						if(veri(vet2[0],vet[0]) == veri(vet2[1],vet[1]) && 
-							veri(vet2[0],vet[0]) == veri(vet2[2],vet[2])){
-							contador++;
+		double menor = 99999, tempcima, tempbaixo;
+		for(int i=0; i < pontos.size() - 1; i++){
+			for(int j = i + 1; j < pontos.size(); j++){
+				tempcima = 0; tempbaixo = 0;
+				if( pontos[i].f == pontos[j].f){
+				 	for(int c =0; c < pontos.size(); c++){
+						if(pontos[c].f == pontos[i].f) continue;
+						if( pontos[c].f < pontos[i].f){
+							tempcima += pontos[i].f - pontos[c].f;
+						}else{
+							tempbaixo += pontos[c].f - pontos[i].f;
 						}
 					}
-					energia += pow(contador,2);
-					memset(vet,-1,sizeof(vet));
-					memset(vet2,-1,sizeof(vet2));
+				}else{
+					vector<double> linha = reta(pontos[i], pontos[j]);
+					for(int c=0; c < pontos.size(); c++){
+						if( veri(linha, pontos[c])) continue;
+						if( lado( linha, pontos[c]) ){
+							tempcima += distRetaPonto(linha, pontos[c]); 
+						}else{
+							tempbaixo += distRetaPonto(linha, pontos[c]);
+						}	
+					}
 				}
+				menor = min(menor, abs(tempcima - tempbaixo));
 			}
 		}
-
-		cout << energia << '\n';
+		cout << fixed << setprecision(3);
+		cout << menor << '\n';
 	}
 	
     return 0;
