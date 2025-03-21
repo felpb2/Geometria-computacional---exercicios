@@ -7,78 +7,68 @@ using namespace std;
 #define mt make_tuple
 #define f first
 #define s second
+const int MAX = 1e9;
 
-bool lado( vector<double> &reta, pair<double,double> &ponto){ // verificar lado da circunferencia
-	return ( ponto.s > (reta[0] * ponto.f + reta[2]) ? true : false);
+double distreta( tuple<double,double,double> reta, pair<double,double> p3){
+
+	return abs(get<0>(reta) * p3.f + get<1>(reta) * p3.s + get<2>(reta));
 }
 
-bool veri( vector<double> &reta, pair<double,double> &ponto){ // verificar se atingi algum ponto
-	return ( ponto.s == (reta[0] * ponto.f + reta[2]) ? true : false);
+double produto_vetorial( tuple<double,double,double> p1, tuple<double,double,double> p2){
+	
+	return get<0>(p1) * get<1>(p2) - get<1>(p1) * get<0>(p2);
+	
 }
 
-double distRetaPonto( vector<double> &reta, pair<double,double> &ponto){
-	return abs(reta[0] * ponto.f + reta[1] * ponto.s + reta[2] )/sqrt(pow(reta[0],2) + pow(reta[1],2));
-}
-
-double coefi( pair<double,double> &p1, pair<double,double> &p2){
-	return (p2.s - p1.s)/(p2.f - p1.f);
-}
-
-vector<double> reta( pair<double,double> &p1, pair<double,double> &p2){
-	double m = coefi(p1,p2);
-	vector<double> seq (3, 0);
-	seq[0] = m;
-	seq[1] = 1;
-	seq[2] = p1.s - m * p1.f;
-	return seq;
-}
-
-int main() {
-	_	
-
-	int t;
-	while(cin >> t, t != 0){
+int main(){
+	_
+	
+	int n;
+	while(cin >> n, n!=0){
 		
 		vector<pair<double,double>> pontos;
 
-		for(int i=0; i < t; i++){
+		for(int i=0; i < n; i++){
 			double x, y;
 			cin >> x >> y;
 			pontos.push_back(mp(x,y));
 		}
 
-
-		double menor = 99999, tempcima, tempbaixo;
+		
+		tuple<double,double,double> v, u, reta;
+		double menor = 1e9;
+		double esquerda, direita, temp, raiz;
 		for(int i=0; i < pontos.size() - 1; i++){
 			for(int j = i + 1; j < pontos.size(); j++){
-				tempcima = 0; tempbaixo = 0;
-				if( pontos[i].f == pontos[j].f){
-				 	for(int c =0; c < pontos.size(); c++){
-						if(pontos[c].f == pontos[i].f) continue;
-						if( pontos[c].f < pontos[i].f){
-							tempcima += pontos[i].f - pontos[c].f;
-						}else{
-							tempbaixo += pontos[c].f - pontos[i].f;
-						}
-					}
-				}else{
-					vector<double> linha = reta(pontos[i], pontos[j]);
-					for(int c=0; c < pontos.size(); c++){
-						if( veri(linha, pontos[c])) continue;
-						if( lado( linha, pontos[c]) ){
-							tempcima += distRetaPonto(linha, pontos[c]); 
-						}else{
-							tempbaixo += distRetaPonto(linha, pontos[c]);
-						}	
+				v = mt(pontos[j].f - pontos[i].f, pontos[j].s - pontos[i].s,0);
+				esquerda = 0; direita = 0;
+	
+				get<0>(reta) = -( pontos[j].s - pontos[i].s );
+				get<1>(reta) = pontos[j].f - pontos[i].f;
+				get<2>(reta) = -( get<1>(reta) * pontos[j].s + get<0>(reta) * pontos[j].f);
+				raiz = sqrt(pow(get<0>(reta),2) + pow(get<1>(reta),2));
+
+				for(int c=0; c < pontos.size(); c++){
+					if( c == i || c == j ) continue;
+					u = mt(pontos[c].f - pontos[i].f, pontos[c].s - pontos[i].s, 0 );
+					temp = produto_vetorial(v,u);
+
+					if( temp > 0 ){
+						esquerda += distreta( reta , pontos[c] )/raiz ;
+					}else if( temp < 0){
+						direita += distreta( reta, pontos[c] )/raiz ;
 					}
 				}
-				menor = min(menor, abs(tempcima - tempbaixo));
+				if( esquerda != 0 || direita != 0 ){
+					menor = min(menor, fabs(direita - esquerda));
+				}
 			}
 		}
 		cout << fixed << setprecision(3);
-		cout << menor << '\n';
+		cout << ( menor == 1e9 ? 0 : menor ) << '\n';
+
 	}
 	
-    return 0;
+	
+	return 0;
 }
-
