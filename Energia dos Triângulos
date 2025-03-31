@@ -7,52 +7,47 @@
  #define f first
  #define s second
  
-int area( pair<int,int> p1, pair<int,int> p2, pair<int,int> p3){
-    return abs( p1.f * (p2.s - p3.s ) + p2.f * (p3.s - p1.s) + p3.f * (p1.s - p2.s) )/2;
+bool prod( pair<double,double> p1, pair<double,double> p2 ){
+	long double pd = p1.f * p2.s - p1.s * p2.f;
+	return ( pd >= 0 ? true : false );
 }
 
 int main() {
  	_	
  	
- 	int pretos,brancos;
- 	while(cin >> pretos >> brancos){
+ 	int n,m;
+ 	while(cin >> n >> m){
  
- 		vector<pair<int,int>> pret,branc;
+ 		vector<pair<double,double>> pont;
  
-        map<pair<int,int>, bool> ord;
- 
- 		for(int i=0; i < pretos; i++){
- 			int x,y;
+ 		for(int i=0; i < n + m; i++){
+ 			double x,y;
  			cin >> x >> y;
-     		pret.push_back(mp(x,y));
- 			
- 		}
- 	    
- 	    ord.clear();
- 	
- 		for(int i=0; i < brancos; i++){
- 			int x,y;
- 			cin >> x >> y;
- 			branc.push_back(mp(x,y));
- 			
+     		pont.push_back(mp(x,y)); 			
  		}
         
  
- 		int contador = 0, areaABC, areaABP, areaBCP, areaCAP;
- 		double energia = 0;
- 		for(int i = 0; i < pret.size() - 2; i++){
- 			for(int j = i + 1; j < pret.size() - 1; j++){
- 				for(int c = j + 1; c < pret.size(); c++){
- 					areaABC = area(pret[i],pret[j],pret[c]);
- 					contador = 0;
- 					for(int v=0;  v < branc.size(); v++){
- 						areaABP = area(pret[i],pret[j],branc[v]);
- 						areaBCP = area(pret[j],pret[c],branc[v]);
- 						areaCAP = area(pret[c],pret[i],branc[v]);
- 						if(areaABP + areaBCP + areaCAP == areaABC){
- 						    contador++;
- 						}
- 					}
+ 		int contador = 0;
+		pair<double,double> ij, jc, ci, ip, cp, jp;
+ 		long long int energia = 0;
+		bool p1,p2,p3;
+ 		for(double i = 0; i < n - 2; i++){
+ 			for(double j = i + 1; j < n - 1; j++){
+ 				for(double c = j + 1; c < n; c++){
+ 					ij = mp( pont[j].f - pont[i].f, pont[j].s - pont[i].s);
+					jc = mp( pont[c].f - pont[j].f, pont[c].s - pont[j].s);
+					ci = mp( pont[i].f - pont[c].f, pont[i].s - pont[c].s);
+					contador = 0;
+ 					for(double v = n;  v < n + m ; v++){
+ 						ip = mp( pont[v].f - pont[i].f, pont[v].s - pont[i].s);	
+						jp = mp( pont[v].f - pont[j].f, pont[v].s - pont[j].s);
+						cp = mp( pont[v].f - pont[c].f, pont[v].s - pont[c].s);
+
+						p1 = prod(ij,ip); p2 = prod( jc,jp); p3 = prod( ci,cp);
+						if(p1 == p2 && p1 == p3 ){
+							contador++;
+						}	
+					}
  					energia += pow(contador,2);
  				}
  			}
